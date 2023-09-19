@@ -61,11 +61,8 @@ class MyWidget : GlanceAppWidget() {
                     .background(GlanceTheme.colors.background)
                     .cornerRadius(8.dp)
             ) {
-                        Box(contentAlignment = Alignment.BottomEnd) {
                             Log.i("MyWidget", "Content: got imageProvider")
-
-                           Text("Hiiiiii")
-                        }
+                            TicTacToeGameGlance()
                     }
 
             }

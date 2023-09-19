@@ -121,11 +121,18 @@ fun TicTacToeGame() {
                         {
                             bottomPadding= lineEdgePadding
                         }
-                        Divider(color = Color.Black,
+//                        Divider(color = Color.Black,
+//                            modifier = Modifier
+//                                .fillMaxHeight()
+//                                .width(2.dp)
+//                                .padding(top = topPadding, bottom = bottomPadding)
+//                        )
+                        Spacer(
+                            //conte = Color.Black,
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .width(2.dp)
-                                .padding(top = topPadding, bottom = bottomPadding)
+                                .padding(top = topPadding, bottom = bottomPadding).background(Color.Black)
                         )
                     }
                 }
@@ -154,6 +161,7 @@ fun TicTacToeGame() {
         }
     }
 }
+
 
 
 fun checkWinner(board: Array<Array<Player>>): Player? {
