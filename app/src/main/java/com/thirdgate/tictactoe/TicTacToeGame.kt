@@ -2,14 +2,12 @@ package com.thirdgate.tictactoe
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
@@ -20,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.RectangleShape
 
 
 enum class Player {
@@ -34,7 +31,7 @@ fun TicTacToeGame() {
     var winner by remember { mutableStateOf(Player.NONE) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -56,32 +53,20 @@ fun TicTacToeGame() {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        for (i in board.indices) {
+        for (r in board.indices) {
             Row(
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.height(IntrinsicSize.Min)
             ) {
-                for (j in board[i].indices) {
+                for (c in board[r].indices) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
                             .background(MaterialTheme.colorScheme.primaryContainer)
-                            .border(
-                                width = if (j < board[i].indices.last) 2.dp else 0.dp,
-                                color = Color.Black,
-                                shape = RectangleShape,
-                            )
-                            .border(
-                                width = if (i < board.indices.last) 2.dp else 0.dp,
-                                color = Color.Black,
-                                shape = RectangleShape,
-                                //top = false, start = false, end = false
-                            )
                             .clickable {
-                                if (board[i][j] == Player.NONE && winner == Player.NONE) {
-                                    board[i][j] = currentPlayer
+                                if (board[r][c] == Player.NONE && winner == Player.NONE) {
+                                    board[r][c] = currentPlayer
                                     currentPlayer =
                                         if (currentPlayer == Player.X) Player.O else Player.X
                                     checkWinner(board)?.let { winner = it }
@@ -89,19 +74,21 @@ fun TicTacToeGame() {
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        when (board[i][j]) {
-                            Player.X -> Text("X", fontSize = 24.sp, color = MaterialTheme.colorScheme.error)
+                        //Text("Test:$r,$c")
+                        when (board[r][c]) {
+                            Player.X -> Text("X", fontSize=24.sp, color = MaterialTheme.colorScheme.error)
                             Player.O -> Text("O", fontSize = 24.sp, color = MaterialTheme.colorScheme.primary)
                             else -> { }
                         }
                     }
-//                    if (j < board[i].indices.last) {
-//                        // Add vertical Divider, except for the last column
-//                        Spacer(
-//                            modifier = Modifier.width(2.dp).fillMaxHeight().background(Color.Black)
-//                        )
-//                    }
+
+                    if (c < board[r].indices.last) {
+                        Divider(color = Color.Black, modifier = Modifier.fillMaxHeight().width(2.dp))
+                    }
                 }
+            }
+            if (r < board[r].indices.last) {
+                Divider(color = Color.Black, modifier = Modifier.fillMaxWidth().height(2.dp))
             }
         }
 
