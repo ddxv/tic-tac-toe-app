@@ -1,5 +1,6 @@
 package com.thirdgate.tictactoe
 
+import android.util.Log
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -17,13 +18,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
+import kotlinx.coroutines.Delay
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 enum class Player {
-    NONE, X, O
+    NONE, X, O, DRAW
 }
 
 @Composable
@@ -31,6 +37,8 @@ fun TicTacToeGame() {
     var currentPlayer by remember { mutableStateOf(Player.X) }
     var board by remember { mutableStateOf(Array(3) { Array(3) { Player.NONE } }) }
     var winner by remember { mutableStateOf(Player.NONE) }
+
+    val coroutineScope = rememberCoroutineScope()
 
     val lineEdgePadding = 20.dp
 
@@ -42,8 +50,12 @@ fun TicTacToeGame() {
 
 
         if (winner != Player.NONE) {
+            var myText = "$winner Wins!"
+            if (winner == Player.DRAW) {
+            myText = "Draw!"
+            }
             Text(
-                text = "${winner} Wins!",
+                text = myText,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.headlineLarge
@@ -77,6 +89,15 @@ fun TicTacToeGame() {
                                     currentPlayer =
                                         if (currentPlayer == Player.X) Player.O else Player.X
                                     checkWinner(board)?.let { winner = it }
+                                    Log.i("Game","board=${board[r][c]}")
+                                    if (winner == Player.NONE && currentPlayer == Player.O) {
+                                        coroutineScope.launch {
+                                            val bestMove = findBestMove(board)
+                                            board[bestMove.first][bestMove.second] = currentPlayer
+                                            currentPlayer = Player.X
+                                            checkWinner(board)?.let { winner = it }
+                                        }
+                                    }
                                 }
                             },
                         contentAlignment = Alignment.Center
@@ -84,7 +105,8 @@ fun TicTacToeGame() {
                         //Text("Test:$r,$c")
                         when (board[r][c]) {
                             Player.X -> Text("X", fontSize=99.sp, color = MaterialTheme.colorScheme.error)
-                            Player.O -> Text("O", fontSize = 99.sp, color = MaterialTheme.colorScheme.primary)
+                            Player.O -> {
+                                Text("O", fontSize = 99.sp, color = MaterialTheme.colorScheme.primary)}
                             else -> { }
                         }
                     }
@@ -100,14 +122,19 @@ fun TicTacToeGame() {
                             bottomPadding= lineEdgePadding
                         }
                         Divider(color = Color.Black,
-                            modifier = Modifier.fillMaxHeight().width(2.dp)
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(2.dp)
                                 .padding(top = topPadding, bottom = bottomPadding)
                         )
                     }
                 }
             }
             if (r < board[r].indices.last) {
-                Divider(color = Color.Black, modifier = Modifier.fillMaxWidth().height(2.dp).padding(horizontal = lineEdgePadding))
+                Divider(color = Color.Black, modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .padding(horizontal = lineEdgePadding))
             }
         }
 
@@ -130,7 +157,7 @@ fun TicTacToeGame() {
 
 
 fun checkWinner(board: Array<Array<Player>>): Player? {
-    // Check rows, columns, diagonals
+    // Check rows, columns
     for (i in 0..2) {
         if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != Player.NONE) {
             return board[i][0]
@@ -139,11 +166,115 @@ fun checkWinner(board: Array<Array<Player>>): Player? {
             return board[0][i]
         }
     }
+    // diagonals
     if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != Player.NONE) {
         return board[0][0]
     }
     if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != Player.NONE) {
         return board[0][2]
     }
+    // check draw
+    if (board.all { row -> row.all { it != Player.NONE } }) {
+            return Player.DRAW // Indicate draw by returning Player.NONE (or you can introduce another enum value for Draw)
+        }
     return null
+}
+
+fun evaluate(board: Array<Array<Player>>): Int {
+    for (row in 0..2) {
+        if (board[row][0] == board[row][1] && board[row][1] == board[row][2]) {
+            when (board[row][0]) {
+                Player.X -> return +10
+                Player.O -> return -10
+                else -> {}
+            }
+        }
+    }
+    for (col in 0..2) {
+        if (board[0][col] == board[1][col] && board[1][col] == board[2][col]) {
+            when (board[0][col]) {
+                Player.X -> return +10
+                Player.O -> return -10
+                else -> {}
+            }
+        }
+    }
+    if (board[0][0] == board[1][1] && board[1][1] == board[2][2]) {
+        when (board[0][0]) {
+            Player.X -> return +10
+            Player.O -> return -10
+            else -> {}
+        }
+    }
+    if (board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
+        when (board[0][2]) {
+            Player.X -> return +10
+            Player.O -> return -10
+            else -> {}
+        }
+    }
+    return 0
+}
+
+fun areMovesLeft(board: Array<Array<Player>>): Boolean {
+    for (i in 0..2) {
+        for (j in 0..2) {
+            if (board[i][j] == Player.NONE) {
+                return true
+            }
+        }
+    }
+    return false
+}
+
+fun minimax(board: Array<Array<Player>>, depth: Int, isMax: Boolean): Int {
+    val score = evaluate(board)
+    if (score == 10) return score
+    if (score == -10) return score
+    if (!areMovesLeft(board)) return 0
+    if (isMax) {
+        var best = Int.MIN_VALUE
+        for (i in 0..2) {
+            for (j in 0..2) {
+                if (board[i][j] == Player.NONE) {
+                    board[i][j] = Player.X
+                    best = maxOf(best, minimax(board, depth + 1, !isMax))
+                    board[i][j] = Player.NONE
+                }
+            }
+        }
+        return best
+    } else {
+        var best = Int.MAX_VALUE
+        for (i in 0..2) {
+            for (j in 0..2) {
+                if (board[i][j] == Player.NONE) {
+                    board[i][j] = Player.O
+                    best = minOf(best, minimax(board, depth + 1, !isMax))
+                    board[i][j] = Player.NONE
+                }
+            }
+        }
+        return best
+    }
+}
+
+suspend fun findBestMove(board: Array<Array<Player>>): Pair<Int, Int> {
+    var bestVal = Int.MAX_VALUE
+    var bestMove = Pair(-1, -1)
+    for (i in 0..2) {
+        for (j in 0..2) {
+            if (board[i][j] == Player.NONE) {
+                board[i][j] = Player.O
+                val moveVal = minimax(board, 0, true)
+                board[i][j] = Player.NONE
+                if (moveVal < bestVal) {
+                    bestMove = Pair(i, j)
+                    bestVal = moveVal
+                }
+            }
+        }
+    }
+    delay(200)
+    return bestMove
 }
