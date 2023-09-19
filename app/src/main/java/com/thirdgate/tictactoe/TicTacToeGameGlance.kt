@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.Button
@@ -21,6 +22,7 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.lazy.LazyColumn
+import androidx.glance.appwidget.lazy.itemsIndexed
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -35,6 +37,7 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.Dimension
 
 import kotlinx.coroutines.launch
 
@@ -80,21 +83,80 @@ fun TicTacToeGameGlance() {
 //                )
 //            )
 //        }
-        board.forEachIndexed { r, row ->
-            Row(
-                modifier = GlanceModifier.height(30.dp)
-            ) {
-                row.forEachIndexed { c, cell ->
-                //Log.i("Widget", "Row:r=$r")
-                //for (c in board[r].indices) {
-                    //Log.i("Widget","Row:r=$r,Col:c=$c")
-                    Box(
-                        modifier = GlanceModifier
-                            //.defaultWeight()
-                            //.background(MaterialTheme.colorScheme.background).width(30.dp)
-                            .background(Color.Gray).width(20.dp).height(20.dp)
-                            .clickable {
-                                Log.i("Game", "Clicked: box=$r,$c:${board[r][c]}, currentPlayer=$currentPlayer")
+        itemsIndexed(board) { r, row ->
+            TicTacToeRow(r, row, board, lineEdgePadding)
+//            Row(
+//                modifier = GlanceModifier.height(30.dp)
+//            ) {
+//                row.forEachIndexed { c, cell ->
+//
+//            }
+            if (r < board[r].indices.last) {
+                Spacer(modifier = GlanceModifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .padding(horizontal = lineEdgePadding).background(Color.Blue))
+            }
+        }
+
+
+        // Added this for the reset button
+        item {
+            if (winner != Player.NONE) {
+                GameOverView(winner) {
+                    board = Array(3) { Array(3) { Player.NONE } }
+                    currentPlayer = Player.X
+                    winner = Player.NONE
+                    actionRunCallback<RefreshAction>()
+                }
+            }
+        }
+
+
+
+
+//        // Display the Reset button only when the game has ended
+//        if (winner != Player.NONE) {
+//            Spacer(modifier = GlanceModifier.height(20.dp))
+//            Button(
+//                text="Reset",
+//                onClick= {
+//                    board = Array(3) { Array(3) { Player.NONE } }
+//                    currentPlayer = Player.X
+//                    winner = Player.NONE
+//                    actionRunCallback<RefreshAction>()
+//                }
+//            )
+//        }
+    }
+}
+}
+
+@Composable
+fun GameOverView(winner: Player, onReset: () -> Unit) {
+    Spacer(modifier = GlanceModifier.height(20.dp))
+    Button(
+        text = "Reset",
+        onClick = onReset
+    )
+}
+
+
+@Composable
+fun TicTacToeRow(r: Int, row: Array<Player>, board: Array<Array<Player>>, lineEdgePadding: Dp) {
+    Row(modifier = GlanceModifier.height(30.dp)) {
+        row.forEachIndexed { c, cell ->
+            // ... your existing code
+            //Log.i("Widget", "Row:r=$r")
+            //for (c in board[r].indices) {
+            //Log.i("Widget","Row:r=$r,Col:c=$c")
+            Box(
+                modifier = GlanceModifier
+                    //.defaultWeight()
+                    //.background(MaterialTheme.colorScheme.background).width(30.dp)
+                    .background(Color.Gray).width(20.dp).height(20.dp)
+                    .clickable {
+                        //Log.i("Game", "Clicked: box=$r,$c:${board[r][c]}, currentPlayer=$currentPlayer")
 //                                if (board[r][c] == Player.NONE && winner == Player.NONE) {
 //                                    board[r][c] = currentPlayer
 //                                    currentPlayer =
@@ -112,77 +174,60 @@ fun TicTacToeGameGlance() {
 //                                        checkWinner(board)?.let { winner = it }
 //                                    }
 //                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        //Log.i("Widget", "Test:$r,$c")
-                        //Text("b:$r,$c")
-                        when (board[r][c]) {
-                            Player.X -> Text(
-                                "X",
-                                style = TextStyle(
-                                    fontSize = 20.sp,
-                                    color = GlanceTheme.colors.error
-                                )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                //Log.i("Widget", "Test:$r,$c")
+                //Text("b:$r,$c")
+                when (board[r][c]) {
+                    Player.X -> Text(
+                        "X",
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            color = GlanceTheme.colors.error
+                        )
+                    )
+                    Player.O -> {
+                        Text(
+                            "O",
+                            style = TextStyle(
+                                fontSize = 20.sp,
+                                color = GlanceTheme.colors.primary
                             )
-                            Player.O -> {
-                                Text(
-                                    "O",
-                                    style = TextStyle(
-                                        fontSize = 20.sp,
-                                        color = GlanceTheme.colors.primary
-                                    )
-                                )
-                            }
-                            else -> {}
-                        }
-                    }
-
-                    if (c < board[r].indices.last) {
-                        var topPadding = 0.dp
-                        var bottomPadding = 0.dp
-                        if (r == board[r].indices.start) {
-                            topPadding = lineEdgePadding
-                        }
-                        if (r == board[r].indices.last) {
-                            bottomPadding = lineEdgePadding
-                        }
-                        // Spacer is with each Box, not each column
-                        Spacer(
-                            modifier = GlanceModifier
-                                .fillMaxHeight()
-                                .width(2.dp)
-                                .padding(top = topPadding, bottom = bottomPadding)
-                                .background(Color.Red)
                         )
                     }
+                    else -> {}
                 }
             }
-            if (r < board[r].indices.last) {
-                Spacer(modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .padding(horizontal = lineEdgePadding).background(Color.Blue))
+
+            if (c < board[r].indices.last) {
+                var topPadding = 0.dp
+                var bottomPadding = 0.dp
+                if (r == board[r].indices.start) {
+                    topPadding = lineEdgePadding
+                }
+                if (r == board[r].indices.last) {
+                    bottomPadding = lineEdgePadding
+                }
+                // Spacer is with each Box, not each column
+                Spacer(
+                    modifier = GlanceModifier
+                        .fillMaxHeight()
+                        .width(2.dp)
+                        .padding(top = topPadding, bottom = bottomPadding)
+                        .background(Color.Red)
+                )
             }
         }
 
-        // Display the Reset button only when the game has ended
-        if (winner != Player.NONE) {
-            Spacer(modifier = GlanceModifier.height(20.dp))
-            Button(
-                text="Reset",
-                onClick= {
-                    board = Array(3) { Array(3) { Player.NONE } }
-                    currentPlayer = Player.X
-                    winner = Player.NONE
-                    actionRunCallback<RefreshAction>()
-                }
-            )
         }
-    }
+//    if (r < board.lastIndex) {
+//        Spacer(modifier = GlanceModifier
+//            .fillMaxWidth()
+//            .height(2.dp)
+//            .padding(horizontal = lineEdgePadding).background(Color.Blue))
+//    }
 }
-}
-
 
 class RefreshAction : ActionCallback {
     override suspend fun onAction(
