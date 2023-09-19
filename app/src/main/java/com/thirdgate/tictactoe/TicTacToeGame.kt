@@ -30,8 +30,10 @@ fun TicTacToeGame() {
     var board by remember { mutableStateOf(Array(3) { Array(3) { Player.NONE } }) }
     var winner by remember { mutableStateOf(Player.NONE) }
 
+    val lineEdgePadding = 20.dp
+
     Column(
-        modifier = Modifier,
+        modifier = Modifier.padding(20.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -83,12 +85,24 @@ fun TicTacToeGame() {
                     }
 
                     if (c < board[r].indices.last) {
-                        Divider(color = Color.Black, modifier = Modifier.fillMaxHeight().width(2.dp))
+                       var topPadding = 0.dp
+                       var bottomPadding = 0.dp
+                        if (r == board[r].indices.start) {
+                        topPadding= lineEdgePadding
+                        }
+                        if (r == board[r].indices.last)
+                        {
+                            bottomPadding= lineEdgePadding
+                        }
+                        Divider(color = Color.Black,
+                            modifier = Modifier.fillMaxHeight().width(2.dp)
+                                .padding(top = topPadding, bottom = bottomPadding)
+                        )
                     }
                 }
             }
             if (r < board[r].indices.last) {
-                Divider(color = Color.Black, modifier = Modifier.fillMaxWidth().height(2.dp))
+                Divider(color = Color.Black, modifier = Modifier.fillMaxWidth().height(2.dp).padding(horizontal = lineEdgePadding))
             }
         }
 
