@@ -268,6 +268,7 @@ fun minimax(board: Array<Array<Player>>, depth: Int, isMax: Boolean): Int {
 }
 
 suspend fun findBestMove(board: Array<Array<Player>>): Pair<Int, Int> {
+    Log.i("Game", "Find best move")
     var bestVal = Int.MAX_VALUE
     var bestMove = Pair(-1, -1)
     for (i in 0..2) {
