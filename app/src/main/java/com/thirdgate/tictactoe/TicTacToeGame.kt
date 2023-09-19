@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
 
 
 enum class Player {
@@ -37,6 +39,8 @@ fun TicTacToeGame() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+
         if (winner != Player.NONE) {
             Text(
                 text = "${winner} Wins!",
@@ -65,7 +69,8 @@ fun TicTacToeGame() {
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .background(MaterialTheme.colorScheme.background)
+                            .clip(RoundedCornerShape(30.dp))
                             .clickable {
                                 if (board[r][c] == Player.NONE && winner == Player.NONE) {
                                     board[r][c] = currentPlayer
@@ -78,8 +83,8 @@ fun TicTacToeGame() {
                     ) {
                         //Text("Test:$r,$c")
                         when (board[r][c]) {
-                            Player.X -> Text("X", fontSize=24.sp, color = MaterialTheme.colorScheme.error)
-                            Player.O -> Text("O", fontSize = 24.sp, color = MaterialTheme.colorScheme.primary)
+                            Player.X -> Text("X", fontSize=99.sp, color = MaterialTheme.colorScheme.error)
+                            Player.O -> Text("O", fontSize = 99.sp, color = MaterialTheme.colorScheme.primary)
                             else -> { }
                         }
                     }
