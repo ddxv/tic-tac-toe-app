@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import com.thirdgate.tictactoe.ui.theme.TicTacToeTheme
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -58,7 +57,7 @@ var showMenu by remember { mutableStateOf(false) }
     Scaffold( topBar = {
         TopAppBar(
         title = {
-            Text(text = "Tic-Tac-Toe: ")
+            Text(text = "Tic-Tac-Toe")
         },
         Modifier.background(color = MaterialTheme.colorScheme.primary),
         //contentColor = MaterialTheme.colors.onPrimary,
