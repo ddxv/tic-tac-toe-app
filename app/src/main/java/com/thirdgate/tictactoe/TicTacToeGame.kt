@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.TextStyle
 import kotlinx.coroutines.Delay
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -58,14 +59,14 @@ fun TicTacToeGame() {
                 text = myText,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineLarge
+                style= TextStyle(color=MaterialTheme.colorScheme.onBackground)
             )
         } else {
             Text(
                 text = "$currentPlayer's Turn",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineLarge
+                style= TextStyle(color=MaterialTheme.colorScheme.onBackground)
             )
         }
 
@@ -104,9 +105,9 @@ fun TicTacToeGame() {
                     ) {
                         //Text("Test:$r,$c")
                         when (board[r][c]) {
-                            Player.X -> Text("X", fontSize=99.sp, color = MaterialTheme.colorScheme.error)
+                            Player.X -> Text("X", fontSize=99.sp, color = MaterialTheme.colorScheme.primary)
                             Player.O -> {
-                                Text("O", fontSize = 99.sp, color = MaterialTheme.colorScheme.primary)}
+                                Text("O", fontSize = 99.sp, color = MaterialTheme.colorScheme.error)}
                             else -> { }
                         }
                     }
@@ -132,13 +133,13 @@ fun TicTacToeGame() {
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .width(2.dp)
-                                .padding(top = topPadding, bottom = bottomPadding).background(Color.Black)
+                                .padding(top = topPadding, bottom = bottomPadding).background(color=MaterialTheme.colorScheme.primary)
                         )
                     }
                 }
             }
             if (r < board[r].indices.last) {
-                Divider(color = Color.Black, modifier = Modifier
+                Divider(color = MaterialTheme.colorScheme.primary, modifier = Modifier
                     .fillMaxWidth()
                     .height(2.dp)
                     .padding(horizontal = lineEdgePadding))

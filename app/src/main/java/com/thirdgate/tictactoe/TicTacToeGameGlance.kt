@@ -184,7 +184,8 @@ fun GameStatusText(winner: State<Player>, currentPlayer: Player) {
             style = TextStyle(
                 fontSize = fontSize,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color=GlanceTheme.colors.onBackground
             )
         )
     }
