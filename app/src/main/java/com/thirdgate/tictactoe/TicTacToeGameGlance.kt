@@ -7,8 +7,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.Button
@@ -28,8 +26,6 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxHeight
-import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
@@ -39,7 +35,6 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -48,8 +43,6 @@ fun TicTacToeGameGlance() {
     var currentPlayer = remember { mutableStateOf(Player.X) }
     var board = remember { mutableStateOf(Array(boardSize) { Array(boardSize) { Player.NONE } }) }
     var winner:MutableState<Player> = remember { mutableStateOf(Player.NONE) }
-    val coroutineScope = rememberCoroutineScope()
-
     val lineEdgePadding = 20.dp
 
     val widgetSize = LocalSize.current
@@ -60,13 +53,11 @@ fun TicTacToeGameGlance() {
 
     GlanceTheme {
         GameStatusText(winner, currentPlayer.value)
-        //Column(
         LazyColumn(
-            modifier = GlanceModifier.padding(5.dp),
+            modifier = GlanceModifier.padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             itemsIndexed(board.value) { r, row ->
-                //board.value.forEachIndexed() { r, row ->
                 Column() {
                     Row(
                         modifier = GlanceModifier.fillMaxWidth(),
@@ -78,7 +69,7 @@ fun TicTacToeGameGlance() {
                                 modifier = GlanceModifier
                                     .defaultWeight()
                                     .height(50.dp)
-                                    .background(Color.Yellow)
+                                    .background(GlanceTheme.colors.background)
                                     .clickable {
                                         Log.i("Game", "Tap: box:$r,$c=${board.value[r][c]} start")
                                         if (board.value[r][c] == Player.NONE && winner.value == Player.NONE) {
@@ -112,13 +103,13 @@ fun TicTacToeGameGlance() {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Log.i("Widget", "Inside box logic:$r,$c")
-                                Text("b:$r,$c")
+                                //Text("b:$r,$c")
                                 when (board.value[r][c]) {
                                     Player.X -> Text(
                                         "X",
                                         style = TextStyle(
-                                            fontSize = 20.sp,
-                                            color = GlanceTheme.colors.error
+                                            fontSize = 30.sp,
+                                            color = GlanceTheme.colors.primary
                                         )
                                     )
 
@@ -126,8 +117,8 @@ fun TicTacToeGameGlance() {
                                         Text(
                                             "O",
                                             style = TextStyle(
-                                                fontSize = 20.sp,
-                                                color = GlanceTheme.colors.primary
+                                                fontSize = 30.sp,
+                                                color = GlanceTheme.colors.error
                                             )
                                         )
                                     }
@@ -148,19 +139,18 @@ fun TicTacToeGameGlance() {
                                 Log.i("Widget", "Placing Spacer Red")
                                 Spacer(
                                     modifier = GlanceModifier
-                                        //.fillMaxHeight()
                                         .width(2.dp)
                                         .padding(top = topPadding, bottom = bottomPadding)
-                                        .background(Color.Red)
+                                        .background(GlanceTheme.colors.primary)
                                 )
                             }
                         }
                     }
                     if (r < board.value[r].indices.last) {
-                        Log.i("Widget", "Placing Spacer Blue")
+                        Log.i("Widget", "Placing Spacer horizontal")
                         Spacer(
                             modifier = GlanceModifier.fillMaxWidth().height(2.dp)
-                                .background(Color.Magenta).padding(horizontal = 50.dp)
+                                .background(GlanceTheme.colors.primary).padding(horizontal = 50.dp)
                         )
                     }
                 }
@@ -188,15 +178,16 @@ fun GameStatusText(winner: State<Player>, currentPlayer: Player) {
     }
 
     val fontSize = if (winner.value == Player.NONE) 24.sp else 20.sp
-
-    Text(
-        text = displayText,
-        style = TextStyle(
-            fontSize = fontSize,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+    Row(horizontalAlignment = Alignment.CenterHorizontally, modifier = GlanceModifier.fillMaxWidth()) {
+        Text(
+            text = displayText,
+            style = TextStyle(
+                fontSize = fontSize,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
         )
-    )
+    }
 }
 
 
@@ -209,103 +200,6 @@ fun GameOverView(winner: Player, onReset: () -> Unit) {
     )
 }
 
-
-//@Composable
-//fun TicTacToeRow(
-//    r: Int,
-//    row: Array<Player>,
-//    board: Array<Array<Player>>,
-//    lineEdgePadding: Dp,
-//    winner: MutableState<Player>,
-//    currentPlayer: MutableState<Player>,
-//    coroutineScope: CoroutineScope
-//) {
-//        row.forEachIndexed { c, cell ->
-//            Log.i("Widget", "forEach Cell create Box:$r,$c")
-//            Box(
-//                modifier = GlanceModifier
-//                    //.defaultWeight()
-//                    .background(Color.Gray).width(50.dp).height(50.dp)
-//                    .clickable {
-//                        Log.i("Game", "Tap: box:$r,$c=${board[r][c]}")
-//                        if (board[r][c] == Player.NONE && winner.value == Player.NONE) {
-//                            board[r][c] = currentPlayer.value
-//                            currentPlayer.value =
-//                                if (currentPlayer.value == Player.X) Player.O else Player.X
-//                            checkWinner(board)?.let { winner.value = it }
-//                            Log.i(
-//                                "Game",
-//                                "Tap: box:$r,$c=${board[r][c]}, set new currentPlayer=${currentPlayer.value}"
-//                            )
-//                            if (winner.value == Player.NONE && currentPlayer.value == Player.O) {
-////                                Log.i(
-////                                    "Game",
-////                                    "Tap: box=$r,$c:${board[r][c]}, launch coroutine for find best move"
-////                                )
-//                                //coroutineScope.launch {
-//                                val bestMove = findBestMove(board)
-//                                Log.i(
-//                                    "Game",
-//                                    "Tap: box:$r,$c=${board[r][c]}, currentPlayer=${currentPlayer.value} bestMove=$bestMove"
-//                                )
-//                                board[bestMove.first][bestMove.second] = currentPlayer.value
-//                                //}
-//                                currentPlayer.value = Player.X
-//                                checkWinner(board)?.let { winner.value = it }
-//                            }
-//                        }
-//                    },
-//                contentAlignment = Alignment.Center
-//            ) {
-//                Log.i("Widget", "Inside box logic?:$r,$c")
-//                Text("b:$r,$c")
-//                when (board[r][c]) {
-//                    Player.X -> Text(
-//                        "X",
-//                        style = TextStyle(
-//                            fontSize = 20.sp,
-//                            color = GlanceTheme.colors.error
-//                        )
-//                    )
-//                    Player.O -> {
-//                        Text(
-//                            "O",
-//                            style = TextStyle(
-//                                fontSize = 20.sp,
-//                                color = GlanceTheme.colors.primary
-//                            )
-//                        )
-//                    }
-//                    else -> {}
-//                }
-//            }
-//            if (c < board[r].indices.last) {
-//                var topPadding = 0.dp
-//                var bottomPadding = 0.dp
-//                if (r == board[r].indices.start) {
-//                    topPadding = lineEdgePadding
-//                }
-//                if (r == board[r].indices.last) {
-//                    bottomPadding = lineEdgePadding
-//                }
-//                // Spacer is with each Box, not each column
-//                Log.i("Widget", "Placing Spacer Red")
-//                Spacer(
-//                    modifier = GlanceModifier
-//                        .fillMaxHeight()
-//                        .width(2.dp)
-//                        .padding(top = topPadding, bottom = bottomPadding)
-//                        .background(Color.Red)
-//                )
-//            }
-//        }
-//        if (r < board.lastIndex) {
-//            Spacer(modifier = GlanceModifier
-//                .fillMaxWidth()
-//                .height(2.dp)
-//                .padding(horizontal = lineEdgePadding).background(Color.Magenta))
-//        }
-//}
 
 
 
