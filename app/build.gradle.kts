@@ -4,6 +4,8 @@ plugins {
     kotlin("plugin.serialization") version "1.9.10"
 }
 
+
+
 android {
     namespace = "com.thirdgate.tictactoe"
     compileSdk = 34
@@ -12,7 +14,7 @@ android {
         applicationId = "com.thirdgate.tictactoe"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -71,12 +73,11 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+
     // For AppWidgets support
     implementation("androidx.glance:glance-appwidget:1.0.0")
 
     // For Glance interop APIs with Material 3
     implementation("androidx.glance:glance-material3:1.0.0")
-
-
 
 }
