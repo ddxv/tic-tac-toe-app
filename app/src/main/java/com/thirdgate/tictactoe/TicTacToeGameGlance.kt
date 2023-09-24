@@ -38,7 +38,7 @@ import androidx.glance.text.TextStyle
 
 
 @Composable
-fun TicTacToeGameGlance() {
+fun TicTacToeGameGlance(glanceId: GlanceId, context:Context, numWins:Int, numLosses:Int, numGames:Int) {
     val boardSize = 3
     var currentPlayer = remember { mutableStateOf(Player.X) }
     var board = remember { mutableStateOf(Array(boardSize) { Array(boardSize) { Player.NONE } }) }
@@ -157,12 +157,30 @@ fun TicTacToeGameGlance() {
             }
             item {
                 if (winner.value != Player.NONE) {
-                    GameOverView(winner.value) {
+                    var games: Int = numGames + 1
+                    var wins: Int = numWins
+                    var losses: Int = numLosses
+                    if (winner.value == Player.X) {
+                        wins = numWins + 1
+                    } else if (winner.value == Player.O) {
+                        losses = numLosses + 1
+                    }
+                    updateWidgetInfo(
+                        context = context,
+                        glanceWidgetId = glanceId,
+                        wins = wins,
+                        losses = losses,
+                        games = games
+                    )
+                    GameOverView() {
                         board.value = Array(boardSize) { Array(boardSize) { Player.NONE } }
                         currentPlayer.value = Player.X
                         winner.value = Player.NONE
                         actionRunCallback<RefreshAction>()
                     }
+                }
+                else {
+                    GamesWonText(numWins = numWins, numLosses = numLosses, games =numGames )
                 }
             }
         }
@@ -190,19 +208,34 @@ fun GameStatusText(winner: State<Player>, currentPlayer: Player) {
         )
     }
 }
-
+@Composable
+fun GamesWonText(numWins: Int, numLosses: Int, games:Int) {
+    val displayText = if (games > 0) {
+       "Games: $games, Won: $numWins, Lost: $numLosses, Draw: ${games - (numWins+numLosses)}"
+    }
+    else {
+        ""
+    }
+    Row(horizontalAlignment = Alignment.CenterHorizontally, modifier = GlanceModifier.fillMaxWidth()) {
+        Text(
+            text = displayText,
+            style = TextStyle(
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+                color=GlanceTheme.colors.onBackground
+            )
+        )
+    }
+}
 
 @Composable
-fun GameOverView(winner: Player, onReset: () -> Unit) {
+fun GameOverView(onReset: () -> Unit) {
     Spacer(modifier = GlanceModifier.height(20.dp))
     Button(
         text = "Reset",
         onClick = onReset
     )
 }
-
-
-
 
 class RefreshAction : ActionCallback {
     override suspend fun onAction(

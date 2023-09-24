@@ -14,7 +14,7 @@ android {
         applicationId = "com.thirdgate.tictactoe"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
+        versionCode = 3
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

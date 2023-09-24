@@ -3,29 +3,22 @@ package com.thirdgate.tictactoe
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.unit.dp
-import androidx.glance.Button
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
-import androidx.glance.Image
-import androidx.glance.LocalContext
 import androidx.glance.LocalGlanceId
-import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
+import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.background
 import androidx.glance.currentState
-import androidx.glance.layout.Alignment
-import androidx.glance.layout.Box
 import androidx.glance.layout.Column
-import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.text.Text
 
 class MyWidget : GlanceAppWidget() {
 
@@ -33,12 +26,12 @@ class MyWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         Log.i("MyWidget", "provideGlance started")
         provideContent {
-            Content()
+            Content(context)
         }
     }
 
     @Composable
-    fun Content() {
+    fun Content(context:Context) {
         Log.i(
             "MyWidget",
             "Content: start"
@@ -47,8 +40,6 @@ class MyWidget : GlanceAppWidget() {
         val numGames = widgetInfo.games
         val numWins = widgetInfo.wins
         val numLosses = widgetInfo.losses
-        val numDraws = numGames - numWins - numLosses
-        val context = LocalContext.current
         val glanceId = LocalGlanceId.current
 
         Log.i("MyWidget", "Content: numGames=$numGames: check numWins=$numWins")
@@ -62,13 +53,32 @@ class MyWidget : GlanceAppWidget() {
                     .cornerRadius(8.dp)
             ) {
                             Log.i("MyWidget", "Content: got imageProvider")
-                            TicTacToeGameGlance()
+                            TicTacToeGameGlance(glanceId, context, numWins, numLosses, numGames)
                     }
 
             }
         }
     }
 
+@Composable
+fun updateWidgetInfo(context:Context, glanceWidgetId:GlanceId, wins:Int, losses:Int, games:Int) {
+    LaunchedEffect(key1=Unit) {
+        updateAppWidgetState(context = context,
+            glanceId = glanceWidgetId,
+            definition = GlanceButtonWidgetStateDefinition(),
+            updateState = { widgetInfo ->
+                WidgetInfo(
+                    games = games,
+                    wins = wins,
+                    losses = losses
+                )
+            }
+        )
+        Log.i("WidgetConfig", "$glanceWidgetId: updateAppWidgetState done")
+        MyWidget().update(context, glanceWidgetId)
+        Log.i("WidgetConfig", "$glanceWidgetId update done")
+    }
+}
 
 
 class TicTacToeWidgetReceiver : GlanceAppWidgetReceiver() {
